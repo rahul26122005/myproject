@@ -1,0 +1,37 @@
+<!-- templates/registration/login.html -->
+
+
+{% extends 'base.html'%}
+{% load static %}
+{% block title %}
+    Login
+    
+{% endblock  %}
+
+{% block content %}
+    <div class="container">
+
+        <h2>Login</h2>
+
+        <p>To register the new user  click the Register</p>
+    
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'register' %}">Register</a>
+            </li>
+        </ul>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" class="form-control" id="username" name="username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" class="form-control" id="password" name="password">
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+    </div>
+{% endblock %}
+

@@ -1,0 +1,55 @@
+<!-- templates/home.html -->
+
+{% extends 'base_generic.html'%}
+{% load static %}
+{% block title %}
+    Home
+    
+{% endblock  %}
+
+{% block content %}
+
+    <div class="container">
+        <h1>Welcome to My Website</h1>
+        <p>This is the home page. Here you can find various links to different parts of the site.</p>
+    </div>
+    <div class="container">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'home' %}">Home</a>
+            </li>
+            
+            <p>To register the new user  click the "Register"</p>
+            
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'register' %}">Register</a>
+            </li>
+            
+            <p>To create the students details click the "Upload Student Details" text</p>
+
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'upload_students' %}">Upload Student Details</a>
+            </li>
+            
+            <p>To mark the Attendance by  click the "mark attendance" text</p>
+            
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'take_attendance' %}">Mark Attendance</a>
+            </li>
+            
+
+            <p>To generate the Attendance report by  click the "generate attendance report" text</p>
+            
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'generate_report' %}">Generate Attendance Report</a>
+            </li>
+            <p>To logout by  click the Mark "logout" text</p>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+            </li>
+        </ul>
+    </div>
+    <div class="footer">
+        &copy; 2024 My Website
+    </div>
+{% endblock %}

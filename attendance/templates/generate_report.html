@@ -1,0 +1,18 @@
+{% extends 'base_generic.html'%}
+{% load static %}
+{% block title %}
+    Generate Attendance Report
+    
+{% endblock  %}
+
+{% block content %}
+<body>
+    <div class="container">
+        <h1>Generate Attendance Report</h1>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Generate Report</button>
+        </form>
+    </div>
+{% endblock %}

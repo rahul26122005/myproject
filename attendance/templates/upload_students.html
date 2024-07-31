@@ -1,0 +1,42 @@
+{% extends 'base_generic.html'%}
+{% load static %}
+{% block title %}
+    upload students details
+    
+{% endblock  %}
+
+{% block content %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Attendance app</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'home' %}">Home</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <h1>Upload Student Details</h1>
+        <p>This is the page to Upload the student details</p>
+        <p>There is condition to upload the students deatils use the excel Template to see the requirements to 
+            upload the student deatils
+        </p>
+        <p>create the your excel file by below the excel Template then upload your file </p>
+        <p><a href="{% url 'student_list' %}">Download Excel Template</a></p>
+        
+        <form action="{% url 'upload_students' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Upload</button>
+        </form>
+        {% if missing_details %}
+            <h2>Missing Details</h2>
+            <ul>
+                {% for details in missing_details %}
+                    <li>{{ details }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+{% endblock %}

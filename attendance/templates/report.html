@@ -1,0 +1,31 @@
+{% extends 'base_generic.html'%}
+{% load static %}
+{% block title %}
+    Attendance Report
+    
+{% endblock  %}
+
+{% block content %}
+<body>
+    <div class="container">
+        <h1>Attendance Report</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Register No</th>
+                    <th>Days Present</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student, data in report_data.items %}
+                <tr>
+                    <td>{{ student }}</td>
+                    <td>{{ data.register_no }}</td>
+                    <td>{{ data.days_present }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

@@ -1,0 +1,18 @@
+<{% extends 'base_generic.html'%}
+{% load static %}
+{% block title %}
+    Login
+    
+{% endblock  %}
+
+{% block content %}
+
+    <h2>Register</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <p>Group: <input type="text" name="group" required></p>
+        <button type="submit">Register</button>
+    </form>
+    <a href="{% url 'login' %}">Login </a>
+{% endblock %}
