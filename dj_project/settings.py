@@ -14,9 +14,11 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 MY_PATH = os.environ.get('MY_ENV_VAR', 'C:/Users/rahul/virtualenvs/django-B5393Xc0')
 
 # Security settings
-SECRET_KEY = env('SECRET_KEY', default='django-insecure-tbpo)2o!oj9(l0hk!unw82u1npk+7-fohv__3m7c8^(@7d6p!0') # type: ignore
+SECRET_KEY: str = os.getenv('SECRET_KEY', 'default-secret-key')
 
-DEBUG = env.bool('DEBUG', default=False) # type: ignore
+
+DEBUG: bool = os.getenv('DEBUG', 'True') == 'True'
+
 
 ALLOWED_HOSTS = ['.vercel.app', '.now.sh' , '127.0.0.1', 'localhost']
 
@@ -31,6 +33,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'attendance',
+    'whitenoise',
+    'mysqlclient',
 ]
 
 
@@ -39,10 +43,13 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+    
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 ROOT_URLCONF = 'dj_project.urls'
 

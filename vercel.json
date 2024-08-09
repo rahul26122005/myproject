@@ -29,6 +29,10 @@
       {
         "src": "/(.*)",
         "dest": "dj_project/wsgi.py"
+      },
+      {
+        "src": "/(.*)",
+        "dest": "vercel_app.handler"
       }
     ]
   }
