@@ -4,7 +4,14 @@
       {
         "src": "dj_project/wsgi.py",
         "use": "@vercel/python",
-        "config": { "maxLambdaSize": "15mb", "runtime": "python3.12" }
+        "config": {
+            "env" : {
+          "MY_ENV_VAR": "C:/Users/rahul/.virtualenvs/django-B5393Xc0"
+          
+        },
+        "maxLambdaSize": "15mb", "runtime": "python3.12"
+        
+      }
       },
       {
         "src": "build_files.sh",
