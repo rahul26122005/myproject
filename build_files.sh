@@ -8,7 +8,7 @@ pip install -r requirements.txt
 
 python manage.py collectstatic --noinput
 
-python manage.py migrate --settings=myproject.settings
+python manage.py migrate --settings=dj_project.settings
 
 # Example: Use an environment variable to set the Django settings module
 export DJANGO_SETTINGS_MODULE=myproject.settings.production
