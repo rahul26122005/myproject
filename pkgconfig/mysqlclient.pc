@@ -1,0 +1,10 @@
+prefix=C:\Program Files\MySQL\MySQL Server 8.0
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: MySQL
+Description: MySQL database client library
+Version: 8.0.30
+Libs: -L${libdir} -lmysqlclient
+Cflags: -I${includedir}
