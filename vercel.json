@@ -9,7 +9,7 @@
           "MY_ENV_VAR": "C:/Users/rahul/.virtualenvs/django-B5393Xc0"
           
         },
-        "maxLambdaSize": "15mb", "runtime": "python3.12",
+        "maxLambdaSize": "15mb", "runtime": "python3.9",
         "maxDuration": 60 
         
       }

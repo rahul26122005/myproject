@@ -9,7 +9,7 @@ from .forms import MonthYearForm, UploadFileForm, UserRegisterForm , MyclassForm
 from openpyxl.styles import Font, Alignment, PatternFill
 from openpyxl.utils import get_column_letter
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import Group
 
 
@@ -72,9 +72,9 @@ def upload_student_file(request):
     
     return render(request, 'upload_students.html', {'form': form})
 
-
 def success(request):
-    return HttpResponse("Students uploaded successfully!")
+    
+    return HttpResponse(request, "Students uploaded successfully!")
 
 # attendance/views.py
 def student_list(request):
@@ -132,11 +132,12 @@ def generate_individual_reports(request):
         file_name = f'student_report_{student.roll_number}.xlsx'
         workbook.save(file_name)
 
-    return HttpResponse("Reports generated successfully!")
+    return HttpResponse(request, "Reports generated successfully!")
 
 def download_template(request):
+
     file_path = os.path.join('D:/django/static/image/', 'student_template.xlsx')
-    return FileResponse(open(file_path, 'rb'), as_attachment=True, filename='student_template.xlsx')
+    return FileResponse(request, open(file_path, 'rb'), as_attachment=True, filename='student_template.xlsx')
     
 
 def select_class(request):
