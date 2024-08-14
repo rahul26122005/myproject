@@ -10,7 +10,7 @@
           
         },
         "maxLambdaSize": "15mb", "runtime": "python3.12",
-        "maxDuration": 50 
+        "maxDuration": 60 
         
       }
       },

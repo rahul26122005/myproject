@@ -12,7 +12,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import Group
 
-@login_required
+
 def index(request):
     return render(request, 'index.html')
 
@@ -37,7 +37,7 @@ def register(request):
         form = UserRegisterForm()
     return render(request, 'register.html', {'form': form})
 
-@login_required
+
 def upload_student_file(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
@@ -47,7 +47,7 @@ def upload_student_file(request):
             sheet = workbook.active
 
             missing_details = []
-            for row in sheet.iter_rows(min_row=2, values_only=True):
+            for row in sheet.iter_rows(min_row=2, values_only=True): # type: ignore
                 name, roll_number, student_class, section = row
                 if not all([name, roll_number, student_class, section]):
                     missing_details.append(row)
@@ -72,7 +72,7 @@ def upload_student_file(request):
     
     return render(request, 'upload_students.html', {'form': form})
 
-@login_required
+
 def success(request):
     return HttpResponse("Students uploaded successfully!")
 
@@ -87,7 +87,7 @@ def student_list(request):
 
     # Read the data from the sheet
     students = []
-    for row in sheet.iter_rows(min_row=2, values_only=True):  # Skip the header row
+    for row in sheet.iter_rows(min_row=2, values_only=True):  # type: ignore # Skip the header row
         students.append({
             'name': row[0],
             'roll_number': row[1],
@@ -102,31 +102,31 @@ def template_page(request):
     pass 
 
 
-@login_required
+
 def generate_individual_reports(request):
     students = Student.objects.all()
     for student in students:
         workbook = openpyxl.Workbook()
         sheet = workbook.active
-        sheet.title = 'Student Report'
+        sheet.title = 'Student Report' # type: ignore
 
         # Set up headers
-        sheet['A1'] = 'Student Report'
-        sheet['A1'].font = Font(size=14, bold=True)
-        sheet['A1'].alignment = Alignment(horizontal='center')
-        sheet.merge_cells('A1:D1')
+        sheet['A1'] = 'Student Report' # type: ignore
+        sheet['A1'].font = Font(size=14, bold=True) # type: ignore
+        sheet['A1'].alignment = Alignment(horizontal='center') # type: ignore
+        sheet.merge_cells('A1:D1') # type: ignore
 
-        sheet['A2'] = 'Name:'
-        sheet['B2'] = student.name
-        sheet['A3'] = 'Roll Number:'
-        sheet['B3'] = student.roll_number
-        sheet['A4'] = 'Class:'
-        sheet['B4'] = student.student_class
-        sheet['A5'] = 'Section:'
-        sheet['B5'] = student.section
+        sheet['A2'] = 'Name:' # type: ignore
+        sheet['B2'] = student.name # type: ignore
+        sheet['A3'] = 'Roll Number:' # type: ignore
+        sheet['B3'] = student.roll_number # type: ignore
+        sheet['A4'] = 'Class:' # type: ignore
+        sheet['B4'] = student.student_class # type: ignore
+        sheet['A5'] = 'Section:' # type: ignore
+        sheet['B5'] = student.section # type: ignore
 
         for col_num in range(1, 5):
-            sheet.column_dimensions[get_column_letter(col_num)].width = 20
+            sheet.column_dimensions[get_column_letter(col_num)].width = 20 # type: ignore
 
         # Save each report
         file_name = f'student_report_{student.roll_number}.xlsx'
@@ -138,12 +138,12 @@ def download_template(request):
     file_path = os.path.join('D:/django/static/image/', 'student_template.xlsx')
     return FileResponse(open(file_path, 'rb'), as_attachment=True, filename='student_template.xlsx')
     
-@login_required
+
 def select_class(request):
     classes = upload_student_file.objects.all()
     return render(request, 'select_class.html', {'classes': classes})
 
-@login_required
+
 def view1(request):
     classes = Student.objects.values_list('student_class', flat=True).distinct()
     selected_class = request.GET.get('class')
@@ -155,9 +155,9 @@ def view1(request):
     if request.method == 'POST':
         form_data = []
         for student in students:
-            status = request.POST.get(f'status_{student.id}')
+            status = request.POST.get(f'status_{student.id}') # type: ignore
             if status:
-                form_data.append({'student': student.id, 'status': status})
+                form_data.append({'student': student.id, 'status': status}) # type: ignore
         
         # Create a form instance for each student to validate and save data
         for data in form_data:
@@ -181,7 +181,7 @@ def view1(request):
         'selected_section': selected_section
     })
 
-@login_required
+
 def view2(request):
     
     if request.method == 'POST':
@@ -193,21 +193,21 @@ def view2(request):
             # Create a new workbook and select the active sheet
             workbook = openpyxl.Workbook()
             sheet = workbook.active
-            sheet.title = 'Attendance Record'
+            sheet.title = 'Attendance Record' # type: ignore
 
             # Set up the headers
-            sheet['A1'] = 'ATTENDANCE RECORD'
-            sheet['A1'].font = Font(size=14, bold=True)
-            sheet['A1'].alignment = Alignment(horizontal='center')
-            sheet.merge_cells('A1:H1')
+            sheet['A1'] = 'ATTENDANCE RECORD' # type: ignore # type: ignore
+            sheet['A1'].font = Font(size=14, bold=True) # type: ignore
+            sheet['A1'].alignment = Alignment(horizontal='center') # type: ignore
+            sheet.merge_cells('A1:H1') # type: ignore # type: ignore
 
-            sheet['B2'] = 'Month:'
-            sheet['C2'] = datetime(year, month, 1).strftime('%B')
-            sheet['B3'] = 'Year:'
-            sheet['C3'] = year
+            sheet['B2'] = 'Month:' # type: ignore
+            sheet['C2'] = datetime(year, month, 1).strftime('%B') # type: ignore
+            sheet['B3'] = 'Year:' # type: ignore
+            sheet['C3'] = year # type: ignore
 
-            sheet['B2'].alignment = Alignment(horizontal='right')
-            sheet['B3'].alignment = Alignment(horizontal='right')
+            sheet['B2'].alignment = Alignment(horizontal='right') # type: ignore
+            sheet['B3'].alignment = Alignment(horizontal='right') # type: ignore
 
             # Set column headers
             headers = ['Em Name', 'Roll Number', 'Class', 'Section']
@@ -220,7 +220,7 @@ def view2(request):
             headers.append('Total Days Present')
 
             for col_num, header in enumerate(headers, 1):
-                cell = sheet.cell(row=5, column=col_num)
+                cell = sheet.cell(row=5, column=col_num) # type: ignore # type: ignore
                 cell.value = header
                 cell.font = Font(bold=True)
                 cell.alignment = Alignment(horizontal='center')
@@ -230,10 +230,10 @@ def view2(request):
             # Fill in the attendance data
             students = Student.objects.all()
             for row_num, student in enumerate(students, 6):
-                sheet.cell(row=row_num, column=1).value = student.name
-                sheet.cell(row=row_num, column=2).value = student.roll_number
-                sheet.cell(row=row_num, column=3).value = student.student_class
-                sheet.cell(row=row_num, column=4).value = student.section
+                sheet.cell(row=row_num, column=1).value = student.name # type: ignore
+                sheet.cell(row=row_num, column=2).value = student.roll_number # type: ignore # type: ignore
+                sheet.cell(row=row_num, column=3).value = student.student_class # type: ignore
+                sheet.cell(row=row_num, column=4).value = student.section # type: ignore
                 total_days_present = 0
                 for day in range(1, 32):
                     try:
@@ -245,23 +245,23 @@ def view2(request):
                                 total_days_present += 1
                         else:
                             status = ''
-                        cell = sheet.cell(row=row_num, column=day+4)
+                        cell = sheet.cell(row=row_num, column=day+4) # type: ignore
                         cell.value = status
                         if current_date.date() == date.today():
                             cell.fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
                     except ValueError:
                         break
                 # Write the total number of days present in the last column
-                sheet.cell(row=row_num, column=len(headers)).value = total_days_present
+                sheet.cell(row=row_num, column=len(headers)).value = total_days_present # type: ignore
 
             # Adjust column widths
             for col_num in range(1, len(headers) + 1):
-                sheet.column_dimensions[get_column_letter(col_num)].width = 15
+                sheet.column_dimensions[get_column_letter(col_num)].width = 15 # type: ignore
 
             # Save the workbook to a HttpResponse
             response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
             response['Content-Disposition'] = f'attachment; filename=attendance_{year}_{month}.xlsx'
-            workbook.save(response)
+            workbook.save(response) # type: ignore
             return response
     else:
         form = MonthYearForm()
