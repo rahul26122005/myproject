@@ -8,3 +8,10 @@ Description: MySQL database client library
 Version: 8.0.30
 Libs: -L${libdir} -lmysqlclient
 Cflags: -I${includedir}
+
+
+MYSQL_DATABASE='myproject'
+MYSQL_USER='root'
+MYSQL_PASSWORD='26/12/2005@Ra'
+MYSQL_HOST= '192.168.217.157'
+MYSQL_PORT= '3306'

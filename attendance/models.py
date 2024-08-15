@@ -27,7 +27,7 @@ class Myclass(models.Model):
         return f"{self.student.name} - {self.date} - {self.status}"
     
     def save(self, *args, **kwargs):
-        if not self.id:  # If the instance is being created (not updating)
+        if not self.id:  # type: ignore # If the instance is being created (not updating)
             self.date = date.today()  # Set the date field to the current date
         super().save(*args, **kwargs)  # Call the parent class's save method
 

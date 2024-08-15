@@ -1,10 +1,15 @@
 
 import os
 import environ
+import logging
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+logger = logging.getLogger(__name__)
+logger.info(f"Attempting to access file at: {BASE_DIR}")
 
 # Initialize environment variables
 # Initialize environment variables
@@ -76,7 +81,7 @@ WSGI_APPLICATION = 'dj_project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'mysql.connector.django',
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': env('MYSQL_DATABASE'),
         'USER': env('MYSQL_USER'),
         'PASSWORD': env('MYSQL_PASSWORD'),
@@ -119,7 +124,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [ os.path.join(BASE_DIR, "static")]
+STATICFILES_DIRS = [
+    BASE_DIR /  "static",
+    "/var/www/static",
+]
 STATIC_ROOT = 'D:/django/staticfiles_build/static'
 
 MEDIA_URL="/image/"

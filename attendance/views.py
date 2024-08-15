@@ -17,19 +17,26 @@ from openpyxl.utils import get_column_letter
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import Group
+from django.views import View
+from django.utils.decorators import method_decorator
 
-def index(request):
-    if request.method == 'GET':
+
+class IndexView(View):
+    def get(self, request):
         return render(request, 'index.html')
 
-@user_passes_test(lambda u: u.is_superuser or  Group.objects.get_or_create(name='YourGroupName')[0] in u.groups.all())  # type: ignore
-def group_specific_view(request):
-    if request.method == 'GET':
+@method_decorator(user_passes_test(lambda u: u.is_superuser or Group.objects.get_or_create(name='YourGroupName')[0] in u.groups.all()), name='dispatch')
+class GroupSpecificView(View):
+    def get(self, request):
         return render(request, 'group_specific.html')
 
 
-def register(request):
-    if request.method == 'POST':
+class RegisterView(View):
+    def get(self, request):
+        form = UserRegisterForm()
+        return render(request, 'register.html', {'form': form})
+
+    def post(self, request):
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
@@ -40,13 +47,15 @@ def register(request):
             user = authenticate(username=user.username, password=raw_password)
             login(request, user)
             return redirect('home')
-    else:
-        form = UserRegisterForm()
-    return render(request, 'register.html', {'form': form})
+        return render(request, 'register.html', {'form': form})
 
 
-def upload_student_file(request):
-    if request.method == 'POST':
+class UploadStudentFileView(View):
+    def get(self, request):
+        form = UploadFileForm()
+        return render(request, 'upload_students.html', {'form': form})
+
+    def post(self, request):
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             file = request.FILES['file']
@@ -54,7 +63,7 @@ def upload_student_file(request):
             sheet = workbook.active
 
             missing_details = []
-            for row in sheet.iter_rows(min_row=2, values_only=True):  # type: ignore
+            for row in sheet.iter_rows(min_row=2, values_only=True): # type: ignore
                 name, roll_number, student_class, section = row
                 if not all([name, roll_number, student_class, section]):
                     missing_details.append(row)
@@ -73,22 +82,17 @@ def upload_student_file(request):
                 })
 
             return redirect('success')
-
-    else:
-        form = UploadFileForm()
-    
-    if request.method == 'GET':
         return render(request, 'upload_students.html', {'form': form})
 
 
-def success(request):
-    if request.method == 'GET':
+class SuccessView(View):
+    def get(self, request):
         return HttpResponse(request, "Students uploaded successfully!")
 
 
-def student_list(request):
-    if request.method == 'GET':
-        file_path = os.path.join('D:/django/static/image/','student_template.xlsx')
+class StudentListView(View):
+    def get(self, request):
+        file_path = os.path.join('D:/django/static/image/', 'student_template.xlsx')
         workbook = openpyxl.load_workbook(file_path)
         sheet = workbook.active
 
@@ -103,21 +107,16 @@ def student_list(request):
         return render(request, 'attendance/student_list.html', {'students': students})
 
 
-def template_page(request):
-    # Not implemented yet
-    pass
-
-
-def generate_individual_reports(request):
-    if request.method == 'POST':
+class GenerateIndividualReportsView(View):
+    def post(self, request):
         students = Student.objects.all()
         for student in students:
             workbook = openpyxl.Workbook()
             sheet = workbook.active
             sheet.title = 'Student Report' # type: ignore
 
-            sheet['A1'] = 'Student Report' # type: ignore
-            sheet['A1'].font = Font(size=14, bold=True) # type: ignore # type: ignore
+            sheet['A1'] = 'Student Report' # type: ignore # type: ignore
+            sheet['A1'].font = Font(size=14, bold=True) # type: ignore
             sheet['A1'].alignment = Alignment(horizontal='center') # type: ignore
             sheet.merge_cells('A1:D1') # type: ignore
 
@@ -125,57 +124,42 @@ def generate_individual_reports(request):
             sheet['B2'] = student.name # type: ignore
             sheet['A3'] = 'Roll Number:' # type: ignore
             sheet['B3'] = student.roll_number # type: ignore
-            sheet['A4'] = 'Class:' # type: ignore
-            sheet['B4'] = student.student_class # type: ignore
-            sheet['A5'] = 'Section:' # type: ignore
-            sheet['B5'] = student.section # type: ignore
+            sheet['A4'] = 'Class:'  # type: ignore
+            sheet['B4'] = student.student_class  # type: ignore
+            sheet['A5'] = 'Section:'  # type: ignore
+            sheet['B5'] = student.section  # type: ignore
 
             for col_num in range(1, 5):
-                sheet.column_dimensions[get_column_letter(col_num)].width = 20 # type: ignore
+                sheet.column_dimensions[get_column_letter(col_num)].width = 20  # type: ignore
 
             file_name = f'student_report_{student.roll_number}.xlsx'
             workbook.save(file_name)
 
-        return HttpResponse(request, "Reports generated successfully!")
+        return HttpResponse( request, "Reports generated successfully!")
 
 
-def download_template(request):
-    if request.method == 'GET':
-        file_path = os.path.join('D:/django/static/image/', 'student_template.xlsx')
+class DownloadTemplateView(View):
+    def get(self, request):
+        file_path = os.path.join('D:/django/attendance/templates', 'student_template.xlsx')
         return FileResponse(request, open(file_path, 'rb'), as_attachment=True, filename='student_template.xlsx')
 
 
-def select_class(request):
-    if request.method == 'GET':
-        classes = upload_student_file.objects.all()
+class SelectClassView(View):
+    def get(self, request):
+        classes = Student.objects.values_list('student_class', flat=True).distinct()
+
         return render(request, 'select_class.html', {'classes': classes})
 
 
-def view1(request):
-    classes = Student.objects.values_list('student_class', flat=True).distinct()
-    selected_class = request.GET.get('class')
-    sections = Student.objects.filter(student_class=selected_class).values_list('section', flat=True).distinct() if selected_class else []
-    selected_section = request.GET.get('section')
-    students = Student.objects.filter(student_class=selected_class, section=selected_section) if selected_class and selected_section else Student.objects.none()
-
-    if request.method == 'POST':
-        form_data = []
-        for student in students:
-            status = request.POST.get(f'status_{student.id}') # type: ignore
-            if status:
-                form_data.append({'student': student.id, 'status': status}) # type: ignore
-        
-        for data in form_data:
-            form = MyclassForm(data)
-            if form.is_valid():
-                form.save()
-            else:
-                return JsonResponse({'error': 'Form is not valid', 'details': form.errors}, status=400)
-        
-        return JsonResponse({'message': 'Attendance marked successfully'})
-    
-    if request.method == 'GET':
+class View1(View):
+    def get(self, request):
+        classes = Student.objects.values_list('student_class', flat=True).distinct()
+        selected_class = request.GET.get('class')
+        sections = Student.objects.filter(student_class=selected_class).values_list('section', flat=True).distinct() if selected_class else []
+        selected_section = request.GET.get('section')
+        students = Student.objects.filter(student_class=selected_class, section=selected_section) if selected_class and selected_section else Student.objects.none()
         form = MyclassForm()
+
         return render(request, 'Attendance.html', {
             'form': form,
             'students': students,
@@ -185,9 +169,33 @@ def view1(request):
             'selected_section': selected_section
         })
 
+    def post(self, request):
+        selected_class = request.GET.get('class')
+        selected_section = request.GET.get('section')
+        students = Student.objects.filter(student_class=selected_class, section=selected_section)
+        form_data = []
 
-def view2(request):
-    if request.method == 'POST':
+        for student in students:
+            status = request.POST.get(f'status_{student.id}') # type: ignore
+            if status:
+                form_data.append({'student': student.id, 'status': status}) # type: ignore
+
+        for data in form_data:
+            form = MyclassForm(data)
+            if form.is_valid():
+                form.save()
+            else:
+                return JsonResponse({'error': 'Form is not valid', 'details': form.errors}, status=400)
+
+        return JsonResponse({'message': 'Attendance marked successfully'})
+
+
+class View2(View):
+    def get(self, request):
+        form = MonthYearForm()
+        return render(request, 'generate_report.html', {'form': form})
+
+    def post(self, request):
         form = MonthYearForm(request.POST)
         if form.is_valid():
             month = form.cleaned_data['month']
@@ -195,11 +203,11 @@ def view2(request):
 
             workbook = openpyxl.Workbook()
             sheet = workbook.active
-            sheet.title = 'Attendance Record'  # type: ignore
+            sheet.title = 'Attendance Record' # type: ignore
 
             sheet['A1'] = 'ATTENDANCE RECORD'  # type: ignore
             sheet['A1'].font = Font(size=14, bold=True)  # type: ignore
-            sheet['A1'].alignment = Alignment(horizontal='center')  # type: ignore 
+            sheet['A1'].alignment = Alignment(horizontal='center')  # type: ignore
             sheet.merge_cells('A1:H1')  # type: ignore
 
             sheet['B2'] = 'Month:'  # type: ignore
@@ -242,25 +250,30 @@ def view2(request):
                             status = attendance.status
                             if status in ['present', 'od']:
                                 total_days_present += 1
-                            else:
-                                status = ''
-                        cell = sheet.cell(row=row_num, column=day+4) # type: ignore
+                        else:
+                            status = ''
+                        cell = sheet.cell(row=row_num, column=day + 4)  # type: ignore
                         cell.value = status
                         if current_date.date() == date.today():
                             cell.fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
                     except ValueError:
                         break
-                sheet.cell(row=row_num, column=len(headers)).value = total_days_present # type: ignore
+                sheet.cell(row=row_num, column=len(headers)).value = total_days_present  # type: ignore
 
             for col_num in range(1, len(headers) + 1):
                 sheet.column_dimensions[get_column_letter(col_num)].width = 15  # type: ignore
 
-            # Save to a BytesIO object
-            output = BytesIO()
-            workbook.save(output)
-            output.seek(0)
 
-            # Create the HTTP response
-            response = HttpResponse(output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            response['Content-Disposition'] = f'attachment; filename=attendance_{year}_{month}.xlsx'
-            return response
+                response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+                response['Content-Disposition'] = f'attachment; filename=attendance_{year}_{month}.xlsx'
+
+                # Save the workbook to an in-memory file
+                output = BytesIO()
+                workbook.save(output)
+                output.seek(0)
+
+                # Write the in-memory file to the response
+                response.write(output.read())
+
+                return response    
+
