@@ -3,6 +3,11 @@
 # Example of using an environment variable to specify a path
 export MY_PATH_ENV_VAR="C:\Users\rahul\.virtualenvs\django-B5393Xc0"
 
+#!/bin/bash
+apt-get update
+apt-get install -y libmysqlclient-dev
+
+
 # Use the environment variable in your script
 pip install -r requirements.txt
 
