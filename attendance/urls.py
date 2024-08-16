@@ -29,7 +29,7 @@ urlpatterns = [
     path('download-template/', DownloadTemplateView.as_view(), name='download_template'),
     path('select-class/', SelectClassView.as_view(), name='select_class'),
     path('Attendance/', View1.as_view(), name='take_attendance'),
-    path('generate_report/ ', View2.as_view(), name='generate_report'),
+    path('generate_report/', View2.as_view(), name='generate_report'),
 ]
 
 if settings.DEBUG:
