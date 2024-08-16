@@ -92,7 +92,7 @@ class SuccessView(View):
 
 class StudentListView(View):
     def get(self, request):
-        file_path = os.path.join('D:/django/static/image/', 'student_template.xlsx')
+        file_path = os.path.join('D:/django/attendance/templates', 'student_template.xlsx')
         workbook = openpyxl.load_workbook(file_path)
         sheet = workbook.active
 
