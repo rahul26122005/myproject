@@ -4,6 +4,7 @@ import os
 from django.http import JsonResponse, HttpResponse, FileResponse
 from django.http import HttpResponse
 import openpyxl
+from django.db import transaction
 from openpyxl.styles import Font, Alignment, PatternFill
 from openpyxl.utils import get_column_letter
 from datetime import datetime, date
@@ -151,43 +152,32 @@ class SelectClassView(View):
         return render(request, 'select_class.html', {'classes': classes})
 
 
-class View1(View):
-    def get(self, request):
-        classes = Student.objects.values_list('student_class', flat=True).distinct()
-        selected_class = request.GET.get('class')
-        sections = Student.objects.filter(student_class=selected_class).values_list('section', flat=True).distinct() if selected_class else []
-        selected_section = request.GET.get('section')
-        students = Student.objects.filter(student_class=selected_class, section=selected_section) if selected_class and selected_section else Student.objects.none()
-        form = MyclassForm()
 
-        return render(request, 'Attendance.html', {
-            'form': form,
-            'students': students,
-            'classes': classes,
-            'selected_class': selected_class,
-            'sections': sections,
-            'selected_section': selected_section
-        })
+
+class View1(View):
+    # ...
 
     def post(self, request):
         selected_class = request.GET.get('class')
         selected_section = request.GET.get('section')
         students = Student.objects.filter(student_class=selected_class, section=selected_section)
-        form_data = []
+        attendance_data = []
 
         for student in students:
-            status = request.POST.get(f'status_{student.id}') # type: ignore
+            status = request.POST.get(f'status_{student.id}')  # type: ignore
             if status:
-                form_data.append({'student': student.id, 'status': status}) # type: ignore
+                attendance_data.append(Attendance(student=student, status=status))  # Replace MyclassForm with your Attendance model
 
-        for data in form_data:
-            form = MyclassForm(data)
-            if form.is_valid():
-                form.save()
-            else:
-                return JsonResponse({'error': 'Form is not valid', 'details': form.errors}, status=400)
+        if attendance_data:
+            try:
+                with transaction.atomic():
+                    Attendance.objects.bulk_create(attendance_data)
+                return JsonResponse({'message': 'Attendance marked successfully'})
+            except Exception as e:
+                return JsonResponse({'error': 'An error occurred while saving attendance', 'details': str(e)}, status=500)
+        else:
+            return JsonResponse({'error': 'No attendance data provided'}, status=400)
 
-        return JsonResponse({'message': 'Attendance marked successfully'})
 
 
 class View2(View):
