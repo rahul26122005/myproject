@@ -19,6 +19,16 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import Group
 from django.views import View
+from django.views import View
+from django.shortcuts import render
+from django.http import JsonResponse
+from .models import Student
+from .forms import MyclassForm
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+
 from django.utils.decorators import method_decorator
 
 
@@ -151,33 +161,58 @@ class SelectClassView(View):
 
         return render(request, 'select_class.html', {'classes': classes})
 
-
-
-
 class View1(View):
-    # ...
+    def get(self, request):
+        logging.debug("GET request received")
+        
+        # Fetch unique classes
+        classes = Student.objects.values_list('student_class', flat=True).distinct()
+        
+        # Get the selected class and sections
+        selected_class = request.GET.get('class')
+        sections = Student.objects.filter(student_class=selected_class).values_list('section', flat=True).distinct() if selected_class else []
+        
+        # Get the selected section and filter students
+        selected_section = request.GET.get('section')
+        students = Student.objects.filter(student_class=selected_class, section=selected_section) if selected_class and selected_section else Student.objects.none()
+        
+        form = MyclassForm()
+
+        return render(request, 'Attendance.html', {
+            'form': form,
+            'students': students,
+            'classes': classes,
+            'selected_class': selected_class,
+            'sections': sections,
+            'selected_section': selected_section
+        })
 
     def post(self, request):
+        logging.debug("POST request received")
+        
+        # Get the selected class and section
         selected_class = request.GET.get('class')
         selected_section = request.GET.get('section')
         students = Student.objects.filter(student_class=selected_class, section=selected_section)
-        attendance_data = []
+        form_data = []
 
+        # Process each student's attendance
         for student in students:
             status = request.POST.get(f'status_{student.id}')  # type: ignore
             if status:
-                attendance_data.append(Attendance(student=student, status=status))  # Replace MyclassForm with your Attendance model
+                form_data.append({'student': student.id, 'status': status})  # type: ignore
 
-        if attendance_data:
-            try:
-                with transaction.atomic():
-                    Attendance.objects.bulk_create(attendance_data)
-                return JsonResponse({'message': 'Attendance marked successfully'})
-            except Exception as e:
-                return JsonResponse({'error': 'An error occurred while saving attendance', 'details': str(e)}, status=500)
-        else:
-            return JsonResponse({'error': 'No attendance data provided'}, status=400)
+        # Save the form data
+        for data in form_data:
+            form = MyclassForm(data)
+            if form.is_valid():
+                form.save()
+            else:
+                logging.error("Form is not valid: %s", form.errors)
+                return JsonResponse({'error': 'Form is not valid', 'details': form.errors}, status=400)
 
+        logging.info("Attendance marked successfully")
+        return JsonResponse({'message': 'Attendance marked successfully'})
 
 
 class View2(View):
