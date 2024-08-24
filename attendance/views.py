@@ -225,7 +225,7 @@ class View2(View):
 
         # Get the selected class and sections
         selected_class = request.GET.get('class')
-        sections = Student.objects.filter(student_class=selected_class).values_list('section', flat=True).distinct() if selected_class else []
+        sections = Student.objects.filter('section', flat=True).distinct()
 
         return render(request, 'generate_report.html', {
             'form': form,
