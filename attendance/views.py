@@ -217,55 +217,49 @@ class View1(View):
 
 class View2(View):
     def get(self, request):
-        # Get month and year form
         form = MonthYearForm()
-
         # Fetch unique classes
         classes = Student.objects.values_list('student_class', flat=True).distinct()
-
-        # Get the selected class and sections
         selected_class = request.GET.get('class')
-        sections = Student.objects.filter('section', flat=True).distinct()
+        sections = Student.objects.filter(student_class=selected_class).values_list('section', flat=True).distinct() if selected_class else []
+        selected_section = request.GET.get('section')
 
         return render(request, 'generate_report.html', {
             'form': form,
             'classes': classes,
             'sections': sections,
-            'selected_class': selected_class
+            'selected_class': selected_class,
+            'selected_section': selected_section
         })
 
     def post(self, request):
-        # Process the month and year selection
         form = MonthYearForm(request.POST)
         selected_class = request.POST.get('class')
         selected_section = request.POST.get('section')
 
-        if form.is_valid():
+        if form.is_valid() and selected_class and selected_section:
             month = form.cleaned_data['month']
             year = form.cleaned_data['year']
 
-            # Create a workbook and sheet
             workbook = openpyxl.Workbook()
             sheet = workbook.active
             sheet.title = 'Attendance Record'  # type: ignore
 
-            # Header row for the report
-            sheet['A1'] = 'ATTENDANCE RECORD'   # type: ignore
+            sheet['A1'] = 'ATTENDANCE RECORD'  # type: ignore
             sheet['A1'].font = Font(size=14, bold=True)  # type: ignore
-            sheet['A1'].alignment = Alignment(horizontal='center')   # type: ignore
-            sheet.merge_cells('A1:H1')   # type: ignore
+            sheet['A1'].alignment = Alignment(horizontal='center')  # type: ignore
+            sheet.merge_cells('A1:H1')  # type: ignore
 
-            sheet['B2'] = 'Month:'   # type: ignore
-            sheet['C2'] = datetime(year, month, 1).strftime('%B')   # type: ignore
+            sheet['B2'] = 'Month:'  # type: ignore
+            sheet['C2'] = datetime(year, month, 1).strftime('%B')  # type: ignore
             sheet['B3'] = 'Year:'   # type: ignore
-            sheet['C3'] = year   # type: ignore
+            sheet['C3'] = year  # type: ignore
 
-            sheet['B2'].alignment = Alignment(horizontal='right')   # type: ignore
-            sheet['B3'].alignment = Alignment(horizontal='right')   # type: ignore
+            sheet['B2'].alignment = Alignment(horizontal='right')  # type: ignore
+            sheet['B3'].alignment = Alignment(horizontal='right')  # type: ignore
 
-            # Column headers for student details and attendance days
-            headers = ['Em Name', 'Roll Number', 'Class', 'Section']
-            for day in range(1, 32):
+            headers = ['Em Name', 'Roll Number', 'Class', 'Section']   # type: ignore
+            for day in range(1, 32): 
                 try:
                     current_date = datetime(year, month, day)
                     headers.append(current_date.strftime('%a %d'))
@@ -281,14 +275,12 @@ class View2(View):
                 if col_num > 4:
                     cell.fill = PatternFill(start_color="DDDDDD", end_color="DDDDDD", fill_type="solid")
 
-            # Filter students by selected class and section
             students = Student.objects.filter(student_class=selected_class, section=selected_section)
-
             for row_num, student in enumerate(students, 6):
                 sheet.cell(row=row_num, column=1).value = student.name  # type: ignore
-                sheet.cell(row=row_num, column=2).value = student.roll_number   # type: ignore
-                sheet.cell(row=row_num, column=3).value = student.student_class   # type: ignore
-                sheet.cell(row=row_num, column=4).value = student.section   # type: ignore
+                sheet.cell(row=row_num, column=2).value = student.roll_number  # type: ignore
+                sheet.cell(row=row_num, column=3).value = student.student_class  # type: ignore
+                sheet.cell(row=row_num, column=4).value = student.section  # type: ignore
                 total_days_present = 0
                 for day in range(1, 32):
                     try:
@@ -300,25 +292,24 @@ class View2(View):
                                 total_days_present += 1
                         else:
                             status = ''
-                        cell = sheet.cell(row=row_num, column=day + 4)   # type: ignore
-                        cell.value = status   
+                        cell = sheet.cell(row=row_num, column=day + 4)  # type: ignore
+                        cell.value = status
                         if current_date.date() == date.today():
                             cell.fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
                     except ValueError:
                         break
-                sheet.cell(row=row_num, column=len(headers)).value = total_days_present   # type: ignore
+                sheet.cell(row=row_num, column=len(headers)).value = total_days_present  # type: ignore
 
             for col_num in range(1, len(headers) + 1):
-                sheet.column_dimensions[get_column_letter(col_num)].width = 15   # type: ignore
-  
-            # Save the workbook to an in-memory file and return it as a response
+                sheet.column_dimensions[get_column_letter(col_num)].width = 15  # type: ignore
+
             response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
             response['Content-Disposition'] = f'attachment; filename=attendance_{year}_{month}.xlsx'
+
             output = BytesIO()
             workbook.save(output)
             output.seek(0)
+
             response.write(output.read())
 
             return response
-
-
