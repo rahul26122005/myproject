@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 import openpyxl
 import os
-from .tasks import make_attendance_task
+#from .tasks import make_attendance_task
 from django.http import JsonResponse, HttpResponse, FileResponse
 from django.http import HttpResponse
 import openpyxl
@@ -225,6 +225,7 @@ class View2(View):
         if form.is_valid():
             month = form.cleaned_data['month']
             year = form.cleaned_data['year']
+            
 
             workbook = openpyxl.Workbook()
             sheet = workbook.active
@@ -302,8 +303,10 @@ class View2(View):
 
                 return response    
 
-
+"""
 def make_attendance_view(request):
     params = request.GET.get('params', None)  # Example of getting params from the request
     task = make_attendance_task.delay(params)
     return JsonResponse({"task_id": task.id, "status": "Task started"})
+
+"""
