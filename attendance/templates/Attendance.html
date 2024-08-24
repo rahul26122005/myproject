@@ -4,61 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
 </head>
 <body>
-    <h1>Mark Attendance</h1>
-    
-    <form method="GET" action="{% url 'take_attendance' %}">
-        <label for="class">Class:</label>
-        <select name="class" id="class">
-            <option value="">Select Class</option>
-            {% for class in classes %}
-                <option value="{{ class }}" {% if class == selected_class %}selected{% endif %}>{{ class }}</option>
-            {% endfor %}
-        </select>
-        <button type="submit">Select Class</button>
-    </form>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Attendance app</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'home' %}">Home</a>
+                </li>
+            </ul>
+        </div>
+    </nav            
+    <div class="container">
+        <h1>Mark Attendance</h1>
+        <p>This is the page to mark attendance by, </p>
+        <p>             1. select the class add sections then mark the attendance </p>
+        <form method="GET" action=".">
+            <div class="form-group">
+                <label for="classSelect">Select Class</label>
+                <select class="form-control" id="classSelect" name="class" onchange="this.form.submit()">
+                    <option value="">Select a class</option>
+                    {% for class in classes %}
+                    <option value="{{ class }}" {% if class == selected_class %}selected{% endif %}>{{ class }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-    {% if selected_class %}
-    <form method="GET" action="{% url 'take_attendance' %}">
-        <input type="hidden" name="class" value="{{ selected_class }}">
-        <label for="section">Section:</label>
-        <select name="section" id="section">
-            <option value="">Select Section</option>
-            {% for section in sections %}
-                <option value="{{ section }}" {% if section == selected_section %}selected{% endif %}>{{ section }}</option>
-            {% endfor %}
-        </select>
-        <button type="submit">Select Section</button>
-    </form>
-    {% endif %}
+            {% if selected_class %}
+            <div class="form-group">
+                <label for="sectionSelect">Select Section</label>
+                <select class="form-control" id="sectionSelect" name="section" onchange="this.form.submit()">
+                    <option value="">Select a section</option>
+                    {% for section in sections %}
+                    <option value="{{ section }}" {% if section == selected_section %}selected{% endif %}>{{ section }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+        </form>
 
-    {% if students %}
-    <form method="POST" action="{% url 'take_attendance' %}">
-        {% csrf_token %}
-        <input type="hidden" name="class" value="{{ selected_class }}">
-        <input type="hidden" name="section" value="{{ selected_section }}">
-        
-        <table>
-            <tr>
-                <th>Student Name</th>
-                <th>Status</th>
-            </tr>
+        {% if selected_class and selected_section %}
+        <form method="POST">
+            {% csrf_token %}
             {% for student in students %}
-            <tr>
-                <td>{{ student.name }}</td>
-                <td>
-                    <select name="status_{{ student.id }}">
-                        <option value="present">Present</option>
-                        <option value="absent">Absent</option>
-                    </select>
-                </td>
-            </tr>
+            <div>
+                <label>{{ student.name }} ({{ student.date }})</label>
+                <div>
+                    <input type="radio" id="id_status_present_{{ student.id }}" name="status_{{ student.id }}" value="present">
+                    <label for="id_status_present_{{ student.id }}">Present</label>
+                </div>
+                <div>
+                    <input type="radio" id="id_status_absent_{{ student.id }}" name="status_{{ student.id }}" value="absent">
+                    <label for="id_status_absent_{{ student.id }}">Absent</label>
+                </div>
+                <div>
+                    <input type="radio" id="id_status_od_{{ student.id }}" name="status_{{ student.id }}" value="od">
+                    <label for="id_status_od_{{ student.id }}">On Duty</label>
+                </div>
+            </div>
             {% endfor %}
-        </table>
+            <button type="submit">Submit Attendance</button>
+        </form>
+        {% endif %}
+    </div>
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-        <button type="submit">Submit Attendance</button>
-    </form>
-    {% endif %}
 </body>
 </html>
