@@ -7,12 +7,28 @@
 
 {% block content %}
 <body>
-    <div class="container">
-        <h1>Generate Attendance Report</h1>
-        <form method="POST">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Generate Report</button>
-        </form>
-    </div>
+    <h1>Generate Attendance Report</h1>
+
+    <form method="post" action="">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <label for="class">Select Class:</label>
+        <select id="class" name="class" onchange="this.form.submit()">
+            <option value="">Select Class</option>
+            {% for class in classes %}
+                <option value="{{ class }}" {% if selected_class == class %}selected{% endif %}>{{ class }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="section">Select Section:</label>
+        <select id="section" name="section" {% if not selected_class %}disabled{% endif %}>
+            <option value="">Select Section</option>
+            {% for section in sections %}
+                <option value="{{ section }}" {% if selected_section == section %}selected{% endif %}>{{ section }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit" {% if not selected_section %}disabled{% endif %}>Generate Report</button>
+    </form>
 {% endblock %}

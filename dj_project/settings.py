@@ -27,7 +27,7 @@ MY_PATH = os.environ.get('MY_ENV_VAR', 'C:/Users/rahul/virtualenvs/django-B5393X
 SECRET_KEY: str = os.getenv('SECRET_KEY', 'default-secret-key')
 
 
-DEBUG: bool = os.getenv('DEBUG', 'True') == 'True'
+DEBUG: bool = os.getenv('DEBUG', 'False') == 'False'
 
 
 ALLOWED_HOSTS = ['.vercel.app', '.now.sh' , '127.0.0.1', 'localhost']
