@@ -23,7 +23,7 @@
             upload the student deatils
         </p>
         <p>create the your excel file by below the excel Template then upload your file </p>
-        <p><a href="{% url 'student_list' %}">Download Excel Template</a></p>
+        <p><a href="{% url 'download_template' %}">Download Excel Template</a></p>
         
         <form action="{% url 'upload_students' %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}

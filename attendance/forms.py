@@ -30,6 +30,8 @@ class MyclassForm(forms.ModelForm):
 class MonthYearForm(forms.Form):
     month = forms.IntegerField(min_value=1, max_value=12, label='Month')
     year = forms.IntegerField(min_value=2000, max_value=2100, label='Year')
+    student_class = forms.CharField(label='Class', max_length=50)
+    section = forms.CharField(label='Section', max_length=50)
    
 class UserRegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
