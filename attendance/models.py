@@ -5,9 +5,9 @@ from django.utils import timezone
 
 class Student(models.Model):
     name = models.CharField(max_length=100, null=True)
-    roll_number = models.CharField(max_length=10, null=True)
-    student_class = models.CharField(max_length=10, null=True)
-    section = models.CharField(max_length=5, null=True)
+    roll_number = models.CharField(max_length=100, null=True)
+    student_class = models.CharField(max_length=100, null=True)
+    section = models.CharField(max_length=80, null=True)
 
     def __str__(self):
         return f'{self.name} ({self.roll_number}){self.student_class}{self.section}'
