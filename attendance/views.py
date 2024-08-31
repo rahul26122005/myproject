@@ -13,6 +13,7 @@ from io import BytesIO
 from datetime import datetime , date
 from .models import *
 from django.conf import settings
+from concurrent.futures import ThreadPoolExecutor
 from .forms import MonthYearForm, UploadFileForm, UserRegisterForm , MyclassForm
 from openpyxl.styles import Font, Alignment, PatternFill
 from openpyxl.utils import get_column_letter
@@ -151,7 +152,7 @@ class GenerateIndividualReportsView(View):
 
 
 def DownloadTemplateView(request):
-        file_path = os.path.join('D:/django/attendance/templates', 'student_template.xlsx')
+        file_path = os.path.join('/attendance/templates', 'student_template.xlsx')
         return FileResponse(request, open(file_path, 'rb'), as_attachment=True, filename='student_template.xlsx')
 
 
@@ -234,6 +235,7 @@ class View2(View):
             sheet = workbook.active
             sheet.title = 'Attendance Record' # type: ignore
 
+            # Setup Title and Header
             sheet['A1'] = 'ATTENDANCE RECORD' # type: ignore
             sheet['A1'].font = Font(size=14, bold=True) # type: ignore
             sheet['A1'].alignment = Alignment(horizontal='center') # type: ignore
@@ -247,7 +249,7 @@ class View2(View):
             sheet['B2'].alignment = Alignment(horizontal='right') # type: ignore
             sheet['B3'].alignment = Alignment(horizontal='right') # type: ignore
 
-            headers = ['Em Name', 'Roll Number', 'Class', 'Section'] 
+            headers = ['ST Name', 'Reg Number', 'Class', 'Section']
             for day in range(1, 32):
                 try:
                     current_date = datetime(year, month, day)
@@ -264,43 +266,45 @@ class View2(View):
                 if col_num > 4:
                     cell.fill = PatternFill(start_color="DDDDDD", end_color="DDDDDD", fill_type="solid")
 
-            students = Student.objects.filter(student_class=student_class, section=section)
-            for row_num, student in enumerate(students, 6):
-                sheet.cell(row=row_num, column=1).value = student.name # type: ignore
-                sheet.cell(row=row_num, column=2).value = student.roll_number # type: ignore
-                sheet.cell(row=row_num, column=3).value = student.student_class # type: ignore
-                sheet.cell(row=row_num, column=4).value = student.section # type: ignore
+            # Optimized database query with prefetch_related
+            students = Student.objects.filter(student_class=student_class, section=section).prefetch_related('myclass_set')
+
+            def process_student(student):
                 total_days_present = 0
+                student_row = [student.name, student.roll_number, student.student_class, student.section]
                 for day in range(1, 32):
                     try:
                         current_date = datetime(year, month, day)
-                        attendance = Myclass.objects.filter(student=student, date=current_date).first()
+                        attendance = student.myclass_set.filter(date=current_date).first()
                         if attendance:
                             status = attendance.status
                             if status in ['present', 'od']:
                                 total_days_present += 1
                         else:
                             status = ''
-                        cell = sheet.cell(row=row_num, column=day+4) # type: ignore
-                        cell.value = status
-                        if current_date.date() == date.today():
-                            cell.fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
+                        student_row.append(status)
                     except ValueError:
                         break
-                sheet.cell(row=row_num, column=len(headers)).value = total_days_present # type: ignore
+                student_row.append(total_days_present)
+                return student_row
+
+            # Parallel processing using ThreadPoolExecutor
+            with ThreadPoolExecutor(max_workers=10) as executor:
+                student_rows = list(executor.map(process_student, students))
+            
+            for row_num, student_row in enumerate(student_rows, 6):
+                for col_num, cell_value in enumerate(student_row, 1):
+                    sheet.cell(row=row_num, column=col_num).value = cell_value # type: ignore
 
             for col_num in range(1, len(headers) + 1):
                 sheet.column_dimensions[get_column_letter(col_num)].width = 15 # type: ignore
 
-            # Create a BytesIO buffer to save the workbook
             buffer = BytesIO()
             workbook.save(buffer)
             buffer.seek(0)
 
-            # Create an HTTP response with the appropriate Excel content type
             response = HttpResponse(buffer, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
             response['Content-Disposition'] = f'attachment; filename=attendance_{year}_{month}.xlsx'
-            
             
             return response
 
