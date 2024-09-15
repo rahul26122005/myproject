@@ -1,9 +1,23 @@
-{% extends 'base_generic.html'%}
+{% extends 'base_generic.html' %}
 {% load static %}
 {% block title %}
     Attendance Report
     
 {% endblock  %}
+
+{% block navbar %}
+<div class="navdiv">
+    <div class="logo"><a href="#">Attendance Management System</a></div>
+    <ul>
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="{% url 'take_attendance' %}">Take Attendance</a></li>
+        <li><a href="{% url 'generate_report' %}">Generate Report</a></li>
+        <button><a href="{% url 'logout' %}">Logout</a></button>
+    </ul>
+
+</div>
+{% endblock %}
+
 
 {% block content %}
 <body>

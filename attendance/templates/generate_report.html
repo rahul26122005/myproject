@@ -1,13 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generate Attendance Report</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+{% extends 'base_generic.html'%}
+{% load static %}
+{% block title %}
+    Generate Report
+{% endblock %}
 
-</head>
-<body>
+{% block navbar %}
+<div class="navdiv">
+    <div class="logo"><a href="#">Attendance Management System</a></div>
+    <ul>
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="{% url 'upload_students' %}">Upload Students</a></li>
+        <li><a href="{% url 'take_attendance' %}">Take Attendance</a></li>
+        <button><a href="{% url 'logout' %}">Logout</a></button>
+    </ul>
+
+</div>
+{% endblock %}
+
+{% block content %}
     <div class="container">
         <h1>Generate Attendance Report</h1>
         <form method="POST">
@@ -16,9 +26,4 @@
             <button type="submit">Generate Report</button>
         </form>
     </div>   
-    <!-- Bootstrap JS and dependencies -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
-</html>
+{% endblock%}

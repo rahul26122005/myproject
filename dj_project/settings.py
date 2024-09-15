@@ -93,6 +93,9 @@ DATABASES = {
         'PASSWORD': 'rahul@2005/12',
         'HOST': 'aws-0-ap-southeast-1.pooler.supabase.com',
         'PORT': '6543',
+        'OPTIONS': {
+            'connect_timeout': 60,  # Adjust the timeout in seconds
+        }
     }
 }
 
@@ -160,5 +163,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Authentication settings
 
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'home'
+LOGIN_REDIRECT_URL = 'index.html'
 LOGOUT_REDIRECT_URL = 'login'

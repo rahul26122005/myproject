@@ -5,17 +5,21 @@
     
 {% endblock  %}
 
+{% block navbar %}
+<div class="navdiv">
+    <div class="logo"><a href="#">Attendance Management System</a></div>
+    <ul>
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="{% url 'take_attendance' %}">Take Attendance</a></li>
+        <li><a href="{% url 'generate_report' %}">Generate Report</a></li>
+        <button><a href="{% url 'register' %}">Register</a></button>
+        <button><a href="{% url 'logout' %}">Logout</a></button>
+    </ul>
+
+</div>
+{% endblock %}
+
 {% block content %}
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Attendance app</a>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'home' %}">Home</a>
-                </li>
-            </ul>
-        </div>
-    </nav>
     <div class="container">
         <h1>Upload Student Details</h1>
         <p>This is the page to Upload the student details</p>

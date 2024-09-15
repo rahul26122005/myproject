@@ -12,6 +12,9 @@ class LoginForm(forms.Form):
     username = forms.CharField(max_length=50)
     password = forms.CharField(max_length=100, widget=forms.PasswordInput())
 
+class LoginoutForm(forms.Form):
+    username = forms.CharField(max_length=50)
+    password = forms.CharField(max_length=100, widget=forms.PasswordInput())
 
 class UploadFileForm(forms.Form):
     file = forms.FileField()
@@ -34,6 +37,7 @@ class MonthYearForm(forms.Form):
     section = forms.CharField(label='Section', max_length=50)
    
 class UserRegisterForm(UserCreationForm):
+    username= forms.CharField(max_length=30)
     email = forms.EmailField(required=True)
     first_name = forms.CharField(max_length=30)
     last_name = forms.CharField(max_length=30)

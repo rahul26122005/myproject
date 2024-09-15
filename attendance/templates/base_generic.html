@@ -4,9 +4,10 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=2.0">
   <!-- Bootstrap CSS -->
    {% load static %}
+   <link rel="stylesheet" href="{% static 'css/mystyle.css' %}">
   <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
   <title>
     {% block title %}
@@ -16,28 +17,13 @@
   </title>
 </head>
 <body>
-  <div>
-    {% block navbar %}
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <a class="navbar-brand" href="#">My Website</a>
-      <div class="collapse navbar-collapse">
-          <ul class="navbar-nav ml-auto">
-              <li class="nav-item">
-                  <a class="nav-link" href="{% url 'home' %}">Home</a>
-              </li>
-              <li class="nav-item">
-                  <a class="nav-link" href="{% url 'group_specific' %}">Group Specific</a>
-              </li>
-              <li class="nav-item">
-                  <a class="nav-link" href="{% url 'register' %}">Register</a>
-              </li>
+<nav class="navbar">
+{% block navbar%}
 
-          </ul>
-      </div>
-  </nav>
-  </div>
-  {% endblock %}
-  
+
+
+{% endblock %}
+</nav>
   
   <div>
     {% block content %}
@@ -47,6 +33,11 @@
     {% endblock %}
   </div>
 
+
 <script src="{% static 'js/bootstrap.min.js' %}"></script>
 </body>
+<div class="footer">
+  @mail; rahulr26122005@gmail.com
+  &copy; 2024 My Website
+</div>
 </html>
