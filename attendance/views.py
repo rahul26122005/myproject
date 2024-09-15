@@ -1,4 +1,3 @@
-from ast import pattern
 from django.conf import settings
 from django.shortcuts import render, redirect
 import openpyxl
