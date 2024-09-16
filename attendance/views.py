@@ -161,7 +161,7 @@ class View1(LoginRequiredMixin, View):
         students =  Student.objects.filter(student_class=selected_class, section=selected_section) if selected_class and selected_section else [] # type: ignore
         form = MyclassForm()
 
-        return render(request, 'attendance.html', {
+        return render(request, 'Attendance.html', {
             'form': form,
             'students': students,
             'classes': classes,
@@ -193,7 +193,7 @@ class View1(LoginRequiredMixin, View):
         return JsonResponse({'message': 'Attendance marked successfully'})
 
 # Report Generation View
-class View2(LoginRequiredMixin, View):
+class View2(View):
     template_name = 'generate_report.html'
     form_class = MonthYearForm
 
@@ -211,11 +211,11 @@ class View2(LoginRequiredMixin, View):
 
             workbook = openpyxl.Workbook()
             sheet = workbook.active
-            sheet.title = 'Attendance Record' # type: ignore # type: ignore
+            sheet.title = 'Attendance Record' # type: ignore
 
-            # Header Setup
+            # Setup Title and Header
             sheet['A1'] = 'ATTENDANCE RECORD' # type: ignore
-            sheet['A1'].font = Font(size=14, bold=True) # type: ignore 
+            sheet['A1'].font = Font(size=14, bold=True) # type: ignore
             sheet['A1'].alignment = Alignment(horizontal='center') # type: ignore
             sheet.merge_cells('A1:H1') # type: ignore
 
@@ -223,10 +223,11 @@ class View2(LoginRequiredMixin, View):
             sheet['C2'] = datetime(year, month, 1).strftime('%B') # type: ignore
             sheet['B3'] = 'Year:' # type: ignore
             sheet['C3'] = year # type: ignore
-            sheet['B2'].alignment = Alignment(horizontal='right') # type: ignore 
-            sheet['B3'].alignment = Alignment(horizontal='right') # type: ignore 
 
-            headers = ['Student Name', 'Reg Number', 'Class', 'Section']
+            sheet['B2'].alignment = Alignment(horizontal='right') # type: ignore
+            sheet['B3'].alignment = Alignment(horizontal='right') # type: ignore
+
+            headers = ['ST Name', 'Reg Number', 'Class', 'Section']
             for day in range(1, 32):
                 try:
                     current_date = datetime(year, month, day)
@@ -234,7 +235,7 @@ class View2(LoginRequiredMixin, View):
                 except ValueError:
                     break
             headers.append('Total Days Present')
-            headers.append('Total Days Absent')
+            headers.append('Total Days Absents')
 
             for col_num, header in enumerate(headers, 1):
                 cell = sheet.cell(row=5, column=col_num) # type: ignore
@@ -244,7 +245,8 @@ class View2(LoginRequiredMixin, View):
                 if col_num > 4:
                     cell.fill = PatternFill(start_color="DDDDDD", end_color="DDDDDD", fill_type="solid")
 
-            students =  Student.objects.filter(student_class=student_class, section=section).prefetch_related('myclass_set')
+            # Optimized database query with prefetch_related
+            students = Student.objects.filter(student_class=student_class, section=section).prefetch_related('myclass_set')
 
             def process_student(student):
                 total_days_present = 0
@@ -258,33 +260,35 @@ class View2(LoginRequiredMixin, View):
                             status = attendance.status
                             if status in ['present', 'od']:
                                 total_days_present += 1
-                            if status == 'absent':
+                            if status in ['absent']:
                                 total_days_absent += 1
-
-                            student_row.append(status)
-
                         else:
-                            student_row.append('')
+                            status = ''
+                        student_row.append(status)
                     except ValueError:
                         break
                 student_row.append(total_days_present)
                 student_row.append(total_days_absent)
                 return student_row
 
-            rows = [process_student(student) for student in students]
-            for row_num, row_data in enumerate(rows, 6):
-                for col_num, cell_value in enumerate(row_data, 1):
-                    cell = sheet.cell(row=row_num, column=col_num) # type: ignore
-                    cell.value = cell_value
-                    cell.alignment = Alignment(horizontal='center')
-
-            output = BytesIO()
-            workbook.save(output)
-            output.seek(0)
-
-            response = HttpResponse(output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            response['Content-Disposition'] = f'attachment; filename=attendance_{month}_{year}.xlsx'
-
-            return response
+            # Parallel processing using ThreadPoolExecutor
+            with ThreadPoolExecutor(max_workers=10) as executor:
+                student_rows = list(executor.map(process_student, students))
             
+            for row_num, student_row in enumerate(student_rows, 6):
+                for col_num, cell_value in enumerate(student_row, 1):
+                    sheet.cell(row=row_num, column=col_num).value = cell_value # type: ignore
+
+            for col_num in range(1, len(headers) + 1):
+                sheet.column_dimensions[get_column_letter(col_num)].width = 15 # type: ignore
+
+            buffer = BytesIO()
+            workbook.save(buffer)
+            buffer.seek(0)
+
+            response = HttpResponse(buffer, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = f'attachment; filename=attendance_{year}_{month}.xlsx'
+            
+            return response
+
         return render(request, self.template_name, {'form': form})
