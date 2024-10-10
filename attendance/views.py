@@ -152,7 +152,7 @@ class SelectClassView(View):
         return HttpResponse(request, 'select_class.html', {'classes': classes})
 
 # Attendance Form View
-class View1(LoginRequiredMixin, View):
+class View1(View):
     def get(self, request):
         classes = Student.objects.values_list('student_class', flat=True).distinct()
         selected_class = request.GET.get('class')
