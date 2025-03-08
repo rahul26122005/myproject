@@ -27,7 +27,7 @@ MY_PATH = os.environ.get('MY_ENV_VAR', 'C:/Users/rahul/virtualenvs/django-B5393X
 SECRET_KEY: str = os.getenv('SECRET_KEY', 'default-secret-key')
 
 
-DEBUG: bool = os.getenv('DEBUG', 'False') == 'False'
+DEBUG: bool = os.getenv('DEBUG', 'True') == 'True'
 
 
 ALLOWED_HOSTS = ['.vercel.app', '.now.sh' , '127.0.0.1', 'localhost']
@@ -89,9 +89,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
-        'USER': 'postgres.bjxodilycntbxmbhtxke',
+        'USER': 'postgres.qldhhkswhvrxftezhsjw',
         'PASSWORD': 'rahul@2005/12',
-        'HOST': 'aws-0-ap-southeast-1.pooler.supabase.com',
+        'HOST': 'aws-0-ap-south-1.pooler.supabase.com',
         'PORT': '6543',
         'OPTIONS': {
             'connect_timeout': 60,  # Adjust the timeout in seconds

@@ -1,3 +1,4 @@
+import http
 from django.conf import settings
 from django.shortcuts import render, redirect
 import openpyxl
@@ -63,7 +64,7 @@ class CustomLogoutView(View):
         return redirect('home')
 
 # Registration View
-class RegisterView(LoginRequiredMixin, View):
+class register(View):
     def get(self, request):
         form = UserRegisterForm()
         return render(request, 'register.html', {'form': form})
@@ -80,7 +81,7 @@ class RegisterView(LoginRequiredMixin, View):
             messages.success(request, ("You Are Successfully Logged In !!...  "))
             messages.success(request, ("wellcome {username} "))
             return redirect('home')
-        return render(request, 'register.html', {'form': form})
+        return render(request, 'signup.html', {'form': form})
 
 # Upload Students View
 
@@ -115,8 +116,6 @@ class UploadStudentFileView(View):
                     'form': form,
                     'missing_details': missing_details
                 })
-
-            return messages.success(request, ("You Are Successfully Upload the Students details  !!...  "))
         return render(request, 'upload_students.html', {'form': form})
 
 
@@ -142,8 +141,8 @@ class StudentListView(View):
 # Download Template View
 
 def DownloadTemplateView(request):
-    file_path = os.path.join(settings.BASE_DIR, 'templates', 'student_template.xlsx')
-    return FileResponse(open(file_path, 'rb'), as_attachment=True, filename='student_template.xlsx')
+    file_path = os.path.join(('D:/myapp/myproject/attendance/templates/student_template.xlsx'))
+    return HttpResponse(request,open(file_path, 'rb'), as_attachment=True, filename='student_template.xlsx')
 
 class SelectClassView(View):
     def get(self, request):

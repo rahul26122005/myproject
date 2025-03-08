@@ -5,14 +5,15 @@ from django.utils import timezone
 
 
 class Student(models.Model):
-    name = models.CharField(max_length=100, null=True)
-    roll_number = models.CharField(max_length=100, null=True)
-    student_class = models.CharField(max_length=100, null=True)
-    section = models.CharField(max_length=80, null=True)
-    User = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    name = models.CharField(max_length=100, blank=True)  # Changed null=True to blank=True
+    roll_number = models.CharField(max_length=100, blank=True, unique=True)  # Unique constraint added
+    student_class = models.CharField(max_length=100, blank=True)
+    section = models.CharField(max_length=80, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)  # Renamed to lowercase
+
 
     def __str__(self):
-        return f'{self.name} ({self.roll_number}){self.student_class}{self.section}{self.User}'
+        return f'{self.name} ({self.roll_number}){self.student_class}{self.section}{self.user}'
 
 
 class Myclass(models.Model):
