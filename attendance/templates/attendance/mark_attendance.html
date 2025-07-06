@@ -1,0 +1,73 @@
+<!-- templates/mark_attendance -->
+
+{% extends 'base_generic.html'%}
+
+{% load static %}
+
+{% block title %}
+    Mark Attendance
+    
+{% endblock  %}
+
+{% block navbar %}
+<div class="navdiv">
+    <div class="logo"><a href="#">Attendance Management System</a></div>
+    <ul>
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="{% url 'upload_students' %}">Upload Students</a></li>
+        <li><a href="{% url 'take_attendance' %}">Take Attendance</a></li>
+        <li><a href="{% url 'generate_report' %}">Generate Report</a></li>
+        <button><a href="{% url 'register' %}">Register</a></button>
+        <button><a href="{% url 'logout' %}">Logout</a></button>
+    </ul>
+
+</div>
+{% endblock %}
+
+{% block content %}
+<h2>Mark Attendance</h2>
+<form method="get">
+    {{ form.as_p }}
+    <button type="submit">Show Students</button>
+</form>
+
+{% if students %}
+<form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="student_class" value="{{ form.cleaned_data.student_class }}">
+    <input type="hidden" name="section" value="{{ form.cleaned_data.section }}">
+    <input type="hidden" name="date" value="{{ today|date:'Y-m-d' }}">
+    <p><strong>Date:</strong> {{ today|date:'F j, Y' }}</p>
+    <table>
+        <tr>
+            <th>Roll Number</th>
+            <th>Name</th>
+            <th>Status</th>
+        </tr>
+        {% for student in students %}
+        <tr>
+            <td>{{ student.roll_number }}</td>
+            <td>{{ student.name }}</td>
+            <td>
+                <label>
+                    <input type="radio" name="status_{{ student.roll_number }}" value="present" required>
+                    Present
+                </label>
+                <label>
+                    <input type="radio" name="status_{{ student.roll_number }}" value="absent">
+                    Absent
+                </label>
+                <label>
+                    <input type="radio" name="status_{{ student.roll_number }}" value="late">
+                    on Duty
+                </label>
+
+                </select>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <button type="submit">Submit Attendance</button>
+</form>
+{% endif %}
+{% endblock %}

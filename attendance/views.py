@@ -1,4 +1,4 @@
-import http
+from datetime import date
 from django.conf import settings
 from django.shortcuts import render, redirect
 import openpyxl
@@ -8,20 +8,23 @@ from openpyxl.styles import Font, Alignment, PatternFill
 from openpyxl.utils import get_column_letter
 from datetime import datetime
 from io import BytesIO
-from .models import Student
-from .forms import MonthYearForm, UploadFileForm, UserRegisterForm, MyclassForm, LoginForm
+
+import attendance
+from .models import Student, Attendance
+from .forms import MonthYearForm, UploadFileForm, UserRegisterForm, LoginForm, ClassSectionForm, AttendanceForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import Group
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
+from django.utils import timezone
+from django.db import transaction
+from django.contrib import messages
 import logging
 from concurrent.futures import ThreadPoolExecutor
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.views.generic import TemplateView
 from django.urls import reverse_lazy
-from django.db import transaction
-from django.contrib import messages
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -150,48 +153,46 @@ class SelectClassView(View):
 
         return HttpResponse(request, 'select_class.html', {'classes': classes})
 
-# Attendance Form View
-class View1(View):
+# Attendance Mark View
+class View1(LoginRequiredMixin, View):
     def get(self, request):
-        classes = Student.objects.values_list('student_class', flat=True).distinct()
-        selected_class = request.GET.get('class')
-        sections =  Student.objects.filter(student_class=selected_class).values_list('section', flat=True).distinct() if selected_class else []
-        selected_section = request.GET.get('section')
-        students =  Student.objects.filter(student_class=selected_class, section=selected_section) if selected_class and selected_section else [] # type: ignore
-        form = MyclassForm()
-
-        return render(request, 'Attendance.html', {
+        form = ClassSectionForm(request.GET or None)
+        students = []
+        today = timezone.now().date()
+        if form.is_valid():
+            student_class = form.cleaned_data['student_class']
+            section = form.cleaned_data['section']
+            students = Student.objects.filter(
+                user=request.user,
+                student_class=student_class,
+                section=section
+            )
+        return render(request, 'attendance/mark_attendance.html', {
             'form': form,
             'students': students,
-            'classes': classes,
-            'selected_class': selected_class,
-            'sections': sections,
-            'selected_section': selected_section
+            'today': today
         })
 
     def post(self, request):
-        selected_class = request.POST.get('class')
-        selected_section = request.POST.get('section')
-        students =  Student.objects.filter(student_class=selected_class, section=selected_section)
-
-        form_data = []
-        for student in students:
-            status = request.POST.get(f'status_{student.id}') # type: ignore
-            if status:
-                form_data.append({'student': student.id, 'status': status}) # type: ignore
-
+        student_class = request.POST.get('student_class')
+        section = request.POST.get('section')
+        date = request.POST.get('date') or timezone.now().date()
+        students = Student.objects.filter(
+            user=request.user,
+            student_class=student_class,
+            section=section
+        )
         with transaction.atomic():
-            for data in form_data:
-                form = MyclassForm(data)
-                if form.is_valid():
-                    form.save()
-                else:
-                    logging.error("Form is not valid: %s", form.errors)
-                    return JsonResponse({'error': 'Form is not valid', 'details': form.errors}, status=400)
+            for student in students:
+                status = request.POST.get(f'status_{student.roll_number}')
+                if status:
+                    Attendance.objects.update_or_create(
+                        student=student,
+                        date=date,
+                        defaults={'status': status}
+                    )
+        return redirect('attendance_success')  # Create this URL/view as needed
 
-        return JsonResponse({'message': 'Attendance marked successfully'})
-
-# Report Generation View
 class View2(View):
     template_name = 'generate_report.html'
     form_class = MonthYearForm
@@ -238,14 +239,14 @@ class View2(View):
 
             for col_num, header in enumerate(headers, 1):
                 cell = sheet.cell(row=5, column=col_num) # type: ignore
-                cell.value = header
+                cell.value = header # type: ignore
                 cell.font = Font(bold=True)
                 cell.alignment = Alignment(horizontal='center')
                 if col_num > 4:
                     cell.fill = PatternFill(start_color="DDDDDD", end_color="DDDDDD", fill_type="solid")
 
             # Optimized database query with prefetch_related
-            students = Student.objects.filter(student_class=student_class, section=section).prefetch_related('myclass_set')
+            students = Student.objects.filter(student_class=student_class, section=section).prefetch_related('attendance_set')
 
             def process_student(student):
                 total_days_present = 0
@@ -254,7 +255,7 @@ class View2(View):
                 for day in range(1, 32):
                     try:
                         current_date = datetime(year, month, day)
-                        attendance = student.myclass_set.filter(date=current_date).first()
+                        attendance = student.attendance_set.filter(date=current_date).first()
                         if attendance:
                             status = attendance.status
                             if status in ['present', 'od']:
@@ -291,3 +292,4 @@ class View2(View):
             return response
 
         return render(request, self.template_name, {'form': form})
+    

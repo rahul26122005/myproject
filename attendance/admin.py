@@ -6,7 +6,7 @@ from django.contrib import admin
 from django.contrib import admin
 from django.contrib.auth.models import Group, User
 from django.contrib.auth.admin import GroupAdmin, UserAdmin
-from .models import Student, Myclass
+from .models import Student, Myclass, Attendance
 
 # Custom Group Admin (if needed)
 class CustomGroupAdmin(GroupAdmin):
@@ -23,6 +23,7 @@ if User in admin.site._registry:
 # Register your models
 admin.site.register(Student)
 admin.site.register(Myclass)
+admin.site.register(Attendance)
 
 # Register Group model with a custom admin if needed
 admin.site.register(Group, CustomGroupAdmin)

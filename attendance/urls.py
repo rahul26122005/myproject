@@ -19,6 +19,7 @@ urlpatterns = [
     path('select-class/', SelectClassView.as_view(), name='select_class'),
     path('Attendance/', View1.as_view(), name='take_attendance'),
     path('generate_report/', View2.as_view(), name='generate_report'),
+   # path('mark-attendance/', AttendanceMarkView.as_view(), name='mark_attendance'),
 ]
 
 if settings.DEBUG:
