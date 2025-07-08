@@ -1,17 +1,13 @@
-from datetime import date
-from django.conf import settings
 from django.shortcuts import render, redirect
 import openpyxl
 import os
-from django.http import JsonResponse, HttpResponse, FileResponse
+from django.http import JsonResponse, HttpResponse
 from openpyxl.styles import Font, Alignment, PatternFill
 from openpyxl.utils import get_column_letter
 from datetime import datetime
 from io import BytesIO
-
-import attendance
 from .models import Student, Attendance
-from .forms import MonthYearForm, UploadFileForm, UserRegisterForm, LoginForm, ClassSectionForm, AttendanceForm
+from .forms import MonthYearForm, UploadFileForm, UserRegisterForm, LoginForm, ClassSectionForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import Group
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -21,10 +17,7 @@ from django.db import transaction
 from django.contrib import messages
 import logging
 from concurrent.futures import ThreadPoolExecutor
-from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import user_passes_test, login_required
-from django.views.generic import TemplateView
-from django.urls import reverse_lazy
+
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -34,12 +27,6 @@ class IndexView(LoginRequiredMixin, View):
     def get(self, request):
 
         return render(request, 'index.html')
-
-# Group-specific View
-@method_decorator(user_passes_test(lambda u: u.is_superuser or Group.objects.filter(name='YourGroupName', user=u).exists()), name='dispatch')
-class GroupSpecificView(View):
-    def get(self, request):
-        return render(request, 'group_specific.html')
 
 # Custom Login View
 class CustomLoginView(View):
@@ -56,14 +43,16 @@ class CustomLoginView(View):
             user = authenticate(request, username=form.cleaned_data['username'], password=form.cleaned_data['password'])
             if user is not None:
                 login(request, user)
+                messages.success(request, f"You Are Successfully Logged In!!...  {user.username}")
                 return redirect('home')
+
         return render(request, self.template_name, {'form': form})
 
-# Custom Logout View
+# Logout View
 class CustomLogoutView(View):
     def get(self, request):
         logout(request)
-        messages.success(request, ("You Are Successfully Logged Out !!...  "))
+        messages.success(request, f"You Are Successfully Logged Out !!...  {request.user.username}")
         return redirect('home')
 
 # Registration View
@@ -88,7 +77,7 @@ class register(View):
 
 # Upload Students View
 
-class UploadStudentFileView(View):
+class UploadStudentFileView(LoginRequiredMixin,View):
     def get(self, request):
         form = UploadFileForm()
         return render(request, 'upload_students.html', {'form': form})
@@ -121,37 +110,12 @@ class UploadStudentFileView(View):
                 })
         return render(request, 'upload_students.html', {'form': form})
 
-
-
-# Student List View
-
-class StudentListView(View):
-    def get(self, request):
-        file_path = os.path.join(settings.BASE_DIR, 'templates', 'student_template.xlsx')
-        workbook = openpyxl.load_workbook(file_path)
-        sheet = workbook.active
-
-        students = []
-        for row in sheet.iter_rows(min_row=2, values_only=True): # type: ignore
-            students.append({
-                'name': row[0],
-                'roll_number': row[1],
-                'department': row[2],
-            })
-
-        return render(request, 'attendance/student_list.html', {'students': students})
-
 # Download Template View
 
 def DownloadTemplateView(request):
-    file_path = os.path.join(('D:/myapp/myproject/attendance/templates/student_template.xlsx'))
+    file_path = os.path.join(('./attendance/templates/student_template.xlsx'))
     return HttpResponse(request,open(file_path, 'rb'), as_attachment=True, filename='student_template.xlsx')
 
-class SelectClassView(View):
-    def get(self, request):
-        classes = Student.objects.values_list('student_class', flat=True).distinct()
-
-        return HttpResponse(request, 'select_class.html', {'classes': classes})
 
 # Attendance Mark View
 class View1(LoginRequiredMixin, View):
@@ -191,9 +155,9 @@ class View1(LoginRequiredMixin, View):
                         date=date,
                         defaults={'status': status}
                     )
-        return redirect('attendance_success')  # Create this URL/view as needed
+        return JsonResponse("Marked sucessfully")  
 
-class View2(View):
+class View2(LoginRequiredMixin,View):
     template_name = 'generate_report.html'
     form_class = MonthYearForm
 

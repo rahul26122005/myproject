@@ -9,17 +9,17 @@ from attendance import views
 
 urlpatterns = [
     path('home/', IndexView.as_view(), name='home'),
-    path('group-specific/', GroupSpecificView.as_view(), name='group_specific'),
+    #path('group-specific/', GroupSpecificView.as_view(), name='group_specific'),
     path('register/', register.as_view(), name='register'),
     path('upload-students/',UploadStudentFileView.as_view(), name='upload_students'),
-    path('student-list/', StudentListView.as_view(), name='student_list'),
+    #path('student-list/', StudentListView.as_view(), name='student_list'),
     path('', CustomLoginView.as_view(), name='login'),   # Login
     path('logout/', CustomLogoutView.as_view(), name='logout'),
     path('download-template/', views.DownloadTemplateView, name='download_template'),
-    path('select-class/', SelectClassView.as_view(), name='select_class'),
+    #path('select-class/', SelectClassView.as_view(), name='select_class'),
     path('Attendance/', View1.as_view(), name='take_attendance'),
     path('generate_report/', View2.as_view(), name='generate_report'),
-   # path('mark-attendance/', AttendanceMarkView.as_view(), name='mark_attendance'),
+   
 ]
 
 if settings.DEBUG:

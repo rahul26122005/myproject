@@ -15,7 +15,6 @@
     <ul>
         <li><a href="{% url 'home' %}">Home</a></li>
         <li><a href="{% url 'upload_students' %}">Upload Students</a></li>
-        <li><a href="{% url 'take_attendance' %}">Take Attendance</a></li>
         <li><a href="{% url 'generate_report' %}">Generate Report</a></li>
         <button><a href="{% url 'register' %}">Register</a></button>
         <button><a href="{% url 'logout' %}">Logout</a></button>
@@ -25,12 +24,22 @@
 {% endblock %}
 
 {% block content %}
+
+<div class="container">
 <h2>Mark Attendance</h2>
 <form method="get">
     {{ form.as_p }}
     <button type="submit">Show Students</button>
 </form>
 
+
+{% if form.errors %}
+    <p style="color: red;">{{ form.errors }}</p>
+{% endif %}
+
+{% if not students %}
+    <p>No students found for the selected class and section.</p>
+{% endif %}
 {% if students %}
 <form method="post">
     {% csrf_token %}
@@ -50,16 +59,16 @@
             <td>{{ student.name }}</td>
             <td>
                 <label>
-                    <input type="radio" name="status_{{ student.roll_number }}" value="present" required>
+                    <input type="radio" name="status_{{ student.roll_number }}" value="Present" required>
                     Present
                 </label>
                 <label>
-                    <input type="radio" name="status_{{ student.roll_number }}" value="absent">
+                    <input type="radio" name="status_{{ student.roll_number }}" value="Absent">
                     Absent
                 </label>
                 <label>
-                    <input type="radio" name="status_{{ student.roll_number }}" value="late">
-                    on Duty
+                    <input type="radio" name="status_{{ student.roll_number }}" value="On Duty">
+                    On Duty
                 </label>
 
                 </select>
@@ -67,7 +76,8 @@
         </tr>
         {% endfor %}
     </table>
-    <button type="submit">Submit Attendance</button>
+    <button type="submit">Submit Attendance</button>>
+</div>
 </form>
 {% endif %}
 {% endblock %}

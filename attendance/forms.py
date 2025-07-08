@@ -2,12 +2,9 @@
 
 from django import forms
 from .models import Student
-from .models import Myclass
 from .models import Attendance
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-
-
 
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=50)
@@ -24,12 +21,6 @@ class StudentForm(forms.ModelForm):
     class Meta:
         model = Student
         fields = ['name', 'roll_number', 'student_class', 'section']
-
-
-class MyclassForm(forms.ModelForm):
-        class Meta:
-            model = Myclass
-            fields = ['student', 'date','status']
 
 class MonthYearForm(forms.Form):
     month = forms.IntegerField(min_value=1, max_value=12, label='Month')

@@ -1,8 +1,6 @@
 from django.db import models
 from datetime import date
 from django.contrib.auth.models import User
-from django.utils import timezone
-
 
 class Student(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
@@ -10,30 +8,9 @@ class Student(models.Model):
     roll_number = models.CharField(max_length=100, blank=True, unique=True)  # Unique constraint added
     student_class = models.CharField(max_length=100, blank=True)
     section = models.CharField(max_length=80, blank=True)
-    #user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)  # Renamed to lowercase
-
-
+    
     def __str__(self):
         return f'{self.name} ({self.roll_number}){self.student_class}{self.section}{self.user}'
-
-
-class Myclass(models.Model):
-    STATUS_CHOICES = [
-        ('present', 'Present'),
-        ('absent', 'Absent'),
-        ('od', 'On Duty')
-    ]
-    student = models.ForeignKey('Student', on_delete=models.CASCADE)
-    date = models.DateField(default=timezone.now)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
-
-    def __str__(self):
-        return f"{self.student.name} - {self.date} - {self.status}"
-    
-    def save(self, *args, **kwargs):
-        if not self.id:  # type: ignore # If the instance is being created (not updating)
-            self.date = date.today()  # Set the date field to the current date
-        super().save(*args, **kwargs)  # Call the parent class's save method
 
 class Attendance(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)

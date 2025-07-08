@@ -1,16 +1,12 @@
 from django.contrib import admin
-
-# Register your models here.
-# admin.py
-
 from django.contrib import admin
 from django.contrib.auth.models import Group, User
 from django.contrib.auth.admin import GroupAdmin, UserAdmin
-from .models import Student, Myclass, Attendance
+from .models import Student, Attendance
 
-# Custom Group Admin (if needed)
+"""# Custom Group Admin (if needed)
 class CustomGroupAdmin(GroupAdmin):
-    list_display = ('name',)
+    list_display = ('name')"""
 
 # Unregister Group model if already registered
 if Group in admin.site._registry:
@@ -22,11 +18,11 @@ if User in admin.site._registry:
 
 # Register your models
 admin.site.register(Student)
-admin.site.register(Myclass)
+
 admin.site.register(Attendance)
 
 # Register Group model with a custom admin if needed
-admin.site.register(Group, CustomGroupAdmin)
+#admin.site.register(Group, CustomGroupAdmin)
 
 # Optional: Register User model with custom admin if needed
 # If you have custom fields or want to customize User admin

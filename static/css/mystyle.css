@@ -51,3 +51,86 @@ button a{
     align-items: last baseline;
 
 }
+
+/* Message styles */
+ul.messages {
+    margin: 20px auto;
+    padding: 0;
+    width: 60%;
+    list-style: none;
+    text-align: center;
+}
+ul.messages li {
+    padding: 10px 20px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    font-size: 18px;
+    font-weight: 500;
+    display: block;
+}
+ul.messages li.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #b2dfb8;
+}
+ul.messages li.error, ul.messages li.danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+ul.messages li.info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+ul.messages li.warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+
+/* Attendance table styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: #fff;
+}
+table th, table td {
+    border: 1px solid #bbb;
+    padding: 10px 8px;
+    text-align: center;
+    font-size: 17px;
+}
+table th {
+    background-color: #f2a365;
+    color: #222;
+    font-weight: bold;
+}
+table tr:nth-child(even) {
+    background-color: #f9eac3;
+}
+table tr:hover {
+    background-color: #ffe0b2;
+}
+button[type="submit"] {
+    background-color: #f2a365;
+    color: #222;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 20px;
+    margin-top: 15px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+button[type="submit"]:hover {
+    background-color: #e76f51;
+    color: #fff;
+}
+
+/* Attendance radio buttons */
+input[type="radio"] {
+    margin-right: 5px;
+    accent-color: #f2a365;
+}
