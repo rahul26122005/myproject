@@ -112,10 +112,14 @@ class UploadStudentFileView(LoginRequiredMixin,View):
 
 # Download Template View
 
-def DownloadTemplateView(request):
-    file_path = os.path.join(('./attendance/templates/student_template.xlsx'))
-    return HttpResponse(request,open(file_path, 'rb'), as_attachment=True, filename='student_template.xlsx')
+"""def DownloadTemplateView(request):
+    file_path = os.path.join('C:/StudioProjects/myproject/attendance/templates/student_template.xlsx')
+    return HttpResponse(request,open(file_path, 'rb'), as_attachment=True, filename='student_template.xlsx')"""
 
+class DownloadTemplateView(View):
+    def get(self,request):
+
+        return render(request, 'student_template.html')
 
 # Attendance Mark View
 class View1(LoginRequiredMixin, View):

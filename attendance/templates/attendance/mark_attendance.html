@@ -29,7 +29,7 @@
 <h2>Mark Attendance</h2>
 <form method="get">
     {{ form.as_p }}
-    <button type="submit">Show Students</button>
+    <button type="submit" class="button">Show Students</button>
 </form>
 
 
@@ -47,7 +47,7 @@
     <input type="hidden" name="section" value="{{ form.cleaned_data.section }}">
     <input type="hidden" name="date" value="{{ today|date:'Y-m-d' }}">
     <p><strong>Date:</strong> {{ today|date:'F j, Y' }}</p>
-    <table>
+    <table class="table th">
         <tr>
             <th>Roll Number</th>
             <th>Name</th>
@@ -59,15 +59,15 @@
             <td>{{ student.name }}</td>
             <td>
                 <label>
-                    <input type="radio" name="status_{{ student.roll_number }}" value="Present" required>
+                    <input type="radio" class="input" name="status_{{ student.roll_number }}" value="Present" required>
                     Present
                 </label>
                 <label>
-                    <input type="radio" name="status_{{ student.roll_number }}" value="Absent">
+                    <input type="radio" class="input" name="status_{{ student.roll_number }}" value="Absent">
                     Absent
                 </label>
                 <label>
-                    <input type="radio" name="status_{{ student.roll_number }}" value="On Duty">
+                    <input type="radio" class="input" name="status_{{ student.roll_number }}" value="On Duty">
                     On Duty
                 </label>
 
@@ -76,7 +76,7 @@
         </tr>
         {% endfor %}
     </table>
-    <button type="submit">Submit Attendance</button>>
+    <button type="submit" class="button">Submit Attendance</button>
 </div>
 </form>
 {% endif %}
